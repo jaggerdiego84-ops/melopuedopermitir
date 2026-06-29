@@ -1,0 +1,711 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>¿Me lo puedo permitir?</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&display=swap');
+:root{--bg:#F7F4EF;--bg2:#EDE9E1;--bg3:#E4DED3;--ink:#1A1814;--ink2:#5C5750;--ink3:#9A9188;--border:#D9D3C8;--border2:#B8B0A2;--verde:#2D6A2D;--verde-bg:#EAF2E8;--amarillo:#7A5200;--amarillo-bg:#FBF0DC;--rojo:#8B1A1A;--rojo-bg:#FAEAEA;--accent:#C8602A;--radius:10px;--radius-sm:6px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;font-size:15px;line-height:1.5;min-height:100vh}
+#shell{max-width:500px;margin:0 auto;padding:2rem 1.25rem 4rem}
+.header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2rem}
+.wordmark{font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink)}
+.step-counter{font-size:11px;color:var(--ink3);font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+.prog-wrap{margin-bottom:2.25rem}.prog-track{height:2px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--ink);border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.fade{animation:up .3s ease both}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.eyebrow{font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.6rem}
+.q-head{font-family:'DM Serif Display',serif;font-size:26px;color:var(--ink);line-height:1.25;margin-bottom:.4rem}
+.q-sub{font-size:13px;color:var(--ink2);margin-bottom:1.75rem;line-height:1.6}
+.opts{display:grid;gap:7px;margin-bottom:1.75rem}
+.opt{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);padding:13px 16px;text-align:left;cursor:pointer;font-size:14px;color:#1A1814;font-family:'Inter',sans-serif;font-weight:500;transition:all .14s;display:flex;align-items:center;gap:11px;position:relative;width:100%}
+.opt:hover{background:#1A1814;color:#fff;border-color:#1A1814}
+.opt.sel{background:#1A1814;color:#fff;border-color:#1A1814}
+.opt.sel::after{content:'✓';position:absolute;right:14px;font-size:13px;font-weight:700;color:#fff}
+.opt-ico{font-size:19px;flex-shrink:0;width:26px;text-align:center}
+.field{margin-bottom:1.25rem}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px}
+.field input,.field textarea,.field select{width:100%;font-size:17px;font-family:'Inter',sans-serif;font-weight:500;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#fff;color:var(--ink);outline:none;-webkit-appearance:none}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(26,24,20,.07)}
+.field textarea{resize:none;min-height:100px;font-size:14px;line-height:1.65;font-weight:400}
+.field select{cursor:pointer;font-size:15px;font-weight:400}
+.field-hint{font-size:12px;color:var(--ink3);margin-top:6px;line-height:1.5}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-primary{width:100%;padding:14px;background:var(--ink);color:#fff;border:none;border-radius:var(--radius);font-size:15px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:opacity .14s;margin-top:.35rem}
+.btn-primary:hover{opacity:.82}.btn-primary:disabled{opacity:.28;cursor:not-allowed}
+.btn-back{background:none;border:none;font-size:12px;color:var(--ink3);cursor:pointer;font-family:'Inter',sans-serif;padding:0;margin-top:1rem;display:flex;align-items:center;gap:5px}
+.btn-back:hover{color:var(--ink2)}
+.btn-toggle{background:none;border:none;font-size:12px;color:var(--ink2);cursor:pointer;font-family:'Inter',sans-serif;padding:0;margin-bottom:1rem;text-decoration:underline;text-underline-offset:3px}
+.detail{background:var(--bg2);border-radius:var(--radius-sm);padding:14px;margin-bottom:1.25rem;display:none;border:1px solid var(--border)}
+.detail.open{display:block}
+.sep{height:1px;background:var(--border);margin:10px 0}
+.calc-preview{font-size:13px;color:var(--ink2);margin-bottom:1rem;font-weight:500;padding:8px 12px;background:var(--bg2);border-radius:var(--radius-sm);display:none}
+.calc-preview.show{display:block}
+
+/* NOTICIAS */
+.news-block{margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.25rem}
+.news-eyebrow{font-size:11px;font-weight:600;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.75rem;display:flex;align-items:center;gap:6px}
+.news-item{margin-bottom:.85rem;padding:10px 12px;background:#fff;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer}
+.news-context{font-size:11px;color:var(--ink3);margin-bottom:3px;font-weight:500}
+.news-title{font-size:13px;color:var(--ink);font-weight:600;line-height:1.4}
+.news-meta{font-size:11px;color:var(--ink3);margin-top:3px}
+.news-loading{font-size:13px;color:var(--ink3);display:flex;align-items:center;gap:8px;padding:8px 0}
+.news-spin{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--ink3);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TENSIÓN */
+.tension{text-align:center;padding:3.5rem 1rem;animation:up .4s ease both}
+.t-icon{font-size:52px;margin-bottom:1.25rem;display:block;animation:breathe 1.4s ease infinite}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.t-title{font-family:'DM Serif Display',serif;font-size:26px;color:var(--ink);margin-bottom:.6rem;line-height:1.25}
+.t-msg{font-size:13px;color:var(--ink2);margin-bottom:2rem;line-height:1.6;min-height:20px}
+.t-track{height:2px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:.4rem}
+.t-fill{height:100%;border-radius:2px;transition:width .08s linear}
+.t-fill.verde{background:var(--verde)}.t-fill.amarillo{background:#C89020}.t-fill.rojo{background:#C03030}
+.t-pct{font-size:11px;color:var(--ink3);text-align:right}
+
+/* RESULTADO */
+.result{animation:up .4s ease both}
+.res-eyebrow{font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1rem}
+.semaforo{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.semaforo.verde{background:var(--verde-bg)}.semaforo.amarillo{background:var(--amarillo-bg)}.semaforo.rojo{background:var(--rojo-bg)}
+.res-title{font-family:'DM Serif Display',serif;font-size:28px;color:var(--ink);line-height:1.2;margin-bottom:0}
+.res-body{font-size:14px;color:var(--ink2);line-height:1.75;margin-bottom:1rem}
+.punch{padding:16px 18px;border-radius:var(--radius);margin-bottom:1.25rem;font-size:14px;line-height:1.7;font-weight:500}
+.punch.verde{background:var(--verde-bg);color:var(--verde);border-left:3px solid var(--verde)}
+.punch.amarillo{background:var(--amarillo-bg);color:var(--amarillo);border-left:3px solid #C89020}
+.punch.rojo{background:var(--rojo-bg);color:var(--rojo);border-left:3px solid #C03030}
+
+/* TIPS GRATUITOS */
+.tips-section{margin-bottom:1.25rem}
+.tips-eyebrow{font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.85rem}
+.tip-item{display:flex;gap:10px;margin-bottom:.85rem;padding:12px 14px;background:#fff;border-radius:var(--radius-sm);border:1px solid var(--border)}
+.tip-num{font-family:'DM Serif Display',serif;font-size:22px;color:var(--border2);flex-shrink:0;line-height:1}
+.tip-content{}
+.tip-title{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.tip-body{font-size:12px;color:var(--ink2);line-height:1.5}
+
+.numero-card{background:var(--ink);color:#fff;border-radius:var(--radius);padding:20px 22px;margin-bottom:1.25rem}
+.numero-eyebrow{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;opacity:.5;margin-bottom:4px}
+.numero-val{font-family:'DM Serif Display',serif;font-size:38px;letter-spacing:-.02em;line-height:1}
+.numero-desc{font-size:12px;opacity:.6;margin-top:8px;line-height:1.5}
+.inds{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem}
+.ind{background:#fff;border-radius:var(--radius-sm);padding:12px;text-align:center;border:1px solid var(--border)}
+.ind-val{font-family:'DM Serif Display',serif;font-size:22px;color:var(--ink);line-height:1}
+.ind-val.neg{color:#C03030}
+.ind-lbl{font-size:10px;color:var(--ink3);margin-top:4px;line-height:1.35;font-weight:500;letter-spacing:.03em;text-transform:uppercase}
+.social{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;margin-bottom:1.25rem;display:flex;align-items:flex-start;gap:10px}
+.social-ico{font-size:18px;flex-shrink:0;margin-top:1px}
+.social-txt{font-size:13px;color:var(--ink2);line-height:1.55}
+.social-txt strong{color:var(--ink)}
+.ia-note{font-size:13px;color:var(--ink2);background:#fff;border-radius:var(--radius-sm);padding:13px 15px;margin-bottom:1.25rem;line-height:1.65;border-left:2px solid var(--border2)}
+.divider{height:1px;background:var(--border);margin:1.5rem 0}
+
+/* CTA PDF */
+.cta-box{border:1px solid var(--border);border-radius:var(--radius);padding:22px;text-align:center;background:#fff}
+.cta-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:rgba(200,96,42,.08);border-radius:4px;padding:3px 10px;margin-bottom:12px}
+.cta-title{font-family:'DM Serif Display',serif;font-size:21px;color:var(--ink);margin-bottom:8px;line-height:1.3}
+.cta-sub{font-size:13px;color:var(--ink2);margin-bottom:16px;line-height:1.6}
+.cta-list{text-align:left;margin-bottom:18px;display:grid;gap:5px}
+.cta-list span{font-size:13px;color:var(--ink2);display:flex;gap:8px;line-height:1.45}
+.cta-list span::before{content:'→';color:var(--accent);flex-shrink:0;font-weight:600}
+.btn-buy{width:100%;padding:15px;background:var(--ink);color:#fff;border:none;border-radius:var(--radius);font-size:16px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-buy:hover{opacity:.83}
+.email-row{margin-top:12px;display:flex;gap:8px}
+.email-row input{flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'Inter',sans-serif;background:#fff;color:var(--ink);outline:none}
+.btn-email{padding:10px 14px;background:none;color:var(--ink2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'Inter',sans-serif;cursor:pointer;white-space:nowrap}
+.btn-email:hover{background:var(--bg2)}
+.cta-footnote{font-size:11px;color:var(--ink3);margin-top:7px}
+.btn-restart{background:none;border:none;font-size:12px;color:var(--ink3);cursor:pointer;font-family:'Inter',sans-serif;padding:0;text-align:center;width:100%;margin-top:1rem}
+
+.btn-test{position:fixed;bottom:16px;right:16px;background:#6B4700;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-family:'Inter',sans-serif;font-weight:600;cursor:pointer;z-index:9999;opacity:0.85;}
+.btn-test:hover{opacity:1;}
+</style>
+</head>
+<body>
+<div id="shell">
+  <div class="header"><span class="wordmark">melopuedopermitir.com</span><span class="step-counter" id="stepLabel"></span></div>
+  <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div></div>
+  <div id="content"></div>
+</div>
+<script>
+var S={step:0,a:{},newsCache:{}};
+var STEPS=[
+  {id:'bienvenida',type:'bienvenida'},
+  {id:'tipo_gasto',type:'opts',ey:'Empecemos',q:'¿Qué quieres analizar?',opts:[{v:'hijo',l:'Tener un hijo o guardería',i:'🍼'},{v:'vivienda',l:'Cambiar de piso o comprar vivienda',i:'🏠'},{v:'coche',l:'Comprar un coche',i:'🚗'},{v:'formacion',l:'Pagar una formación',i:'📚'},{v:'capricho',l:'Un capricho concreto',i:'✨'},{v:'otro',l:'Otro gasto',i:'💰'}]},
+  {id:'gasto_screen',type:'gasto_custom'},
+  {id:'ingresos',type:'number',ey:'Ingresos',q:'¿Cuánto entra en casa cada mes?',sub:'Suma todos los ingresos netos del hogar, después de impuestos.',ph:'2800',unit:'€ netos al mes'},
+  {id:'estabilidad',type:'opts',ey:'Situación laboral',q:'¿Cómo es vuestra situación laboral?',opts:[{v:'indefinido',l:'Indefinido o funcionario',i:'🏛️'},{v:'autonomo',l:'Autónomo',i:'💼'},{v:'temporal',l:'Temporal o por proyecto',i:'📋'},{v:'mixto',l:'Combinación de varias',i:'🔀'}]},
+  {id:'vivienda_bloque',type:'vivienda_custom'},
+  {id:'transporte_bloque',type:'transporte_custom'},
+  {id:'vida_bloque',type:'vida_custom'},
+  {id:'ocio_bloque',type:'ocio_custom'},
+  {id:'deudas_bloque',type:'deudas_custom'},
+  {id:'ahorro_bloque',type:'ahorro_custom'},
+  {id:'texto_libre',type:'texto_libre'}
+];
+var TOTAL=STEPS.length;
+function prog(){return Math.round(((S.step+1)/TOTAL)*100);}
+function cur(){return STEPS[S.step];}
+function getNum(k){return parseFloat(S.a[k])||0;}
+function gVal(k,d){return S.a[k]!==undefined&&S.a[k]!==''?S.a[k]:(d||'');}
+function next(){if(S.step<STEPS.length-1){S.step++;render();
+
+// Comprobar si viene de pago exitoso
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('pago') === 'ok') {
+    setTimeout(function() {
+      alert('¡Pago completado! En unos minutos recibirás el informe en tu email.');
+    }, 500);
+  }
+})();
+fetchNewsForStep();}else{runCalc();}}
+function back(){if(S.step>0){S.step--;render();
+
+// Comprobar si viene de pago exitoso
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('pago') === 'ok') {
+    setTimeout(function() {
+      alert('¡Pago completado! En unos minutos recibirás el informe en tu email.');
+    }, 500);
+  }
+})();
+}}
+function selOpt(id,v){S.a[id]=v;document.querySelectorAll('.opt[data-group="'+id+'"]').forEach(function(b){b.classList.toggle('sel',b.dataset.val===v);});setTimeout(function(){next();},200);}
+function selVivienda(v){S.a.viv_tipo=v;document.querySelectorAll('.opt[data-group="viv_tipo"]').forEach(function(b){b.classList.toggle('sel',b.dataset.val===v);});var viw=document.getElementById('viw');if(viw)viw.style.display=(v==='nada'?'none':'block');}
+function selTransporte(v){S.a.trans_tipo=v;document.querySelectorAll('.opt[data-group="trans_tipo"]').forEach(function(b){b.classList.toggle('sel',b.dataset.val===v);});var tc=document.getElementById('tc'),tp=document.getElementById('tp');if(tc)tc.style.display=(v!=='publico'?'block':'none');if(tp)tp.style.display=(v!=='coche'?'block':'none');}
+function selDeuda(v){S.a.tiene_deudas=v;document.querySelectorAll('.opt[data-group="tiene_deudas"]').forEach(function(b){b.classList.toggle('sel',b.dataset.val===v);});var dw=document.getElementById('dw');if(dw)dw.style.display=(v==='si'?'block':'none');}
+function selCapricho(v){
+  S.a.pago_capricho=v;
+  document.querySelectorAll('.opt[data-group="pago_capricho"]').forEach(function(b){b.classList.toggle('sel',b.dataset.val===v);});
+  var pw=document.getElementById('plazos_wrap');
+  if(pw)pw.style.display=(v==='plazos'?'grid':'none');
+  calcCapricho();
+}
+function calcCapricho(){
+  var total=parseFloat(S.a.precio_total_capricho)||0;
+  var preview=document.getElementById('capricho_preview');
+  if(!preview||!total) return;
+  if(S.a.pago_capricho==='unico'||!S.a.pago_capricho){
+    var mensual=Math.round(total/12);
+    S.a.importe_gasto=String(mensual);
+    preview.className='calc-preview show';
+    preview.textContent='Coste mensual equivalente (a 12 meses): '+mensual.toLocaleString('es-ES')+' €/mes';
+  } else if(S.a.pago_capricho==='plazos'&&S.a.meses_capricho){
+    var cuota=Math.round(total/parseFloat(S.a.meses_capricho));
+    S.a.importe_gasto=String(cuota);
+    preview.className='calc-preview show';
+    preview.textContent='Cuota mensual: '+cuota.toLocaleString('es-ES')+' €/mes durante '+S.a.meses_capricho+' meses';
+  }
+}
+function selPagoCoche(v){S.a.pago_coche=v;document.querySelectorAll('.opt[data-group="pago_coche"]').forEach(function(b){b.classList.toggle('sel',b.dataset.val===v);});var fw=document.getElementById('fin_wrap');if(fw)fw.style.display=(v==='financiado'?'grid':'none');calcCuota();}
+function onNum(id,v){S.a[id]=v;var btn=document.getElementById('btnMain');if(btn)btn.disabled=!v||parseFloat(v)<=0;}
+function toggleDetail(id){var el=document.getElementById(id);el.classList.toggle('open');event.currentTarget.textContent=el.classList.contains('open')?'▲ Ocultar detalle':'▼ Añadir más detalle';}
+function updateLabel(){document.getElementById('stepLabel').textContent=(S.step+1)+' / '+TOTAL;document.getElementById('progFill').style.width=prog()+'%';}
+
+/* NOTICIAS EN TIEMPO REAL */
+function buildNewsContext(){
+  var ctx='Usuario: '+gVal('nombre','alguien')+', vive en '+gVal('ciudad','España')+' ('+gVal('pais','España')+').';
+  if(S.a.tipo_gasto)ctx+=' Está analizando si puede permitirse: '+S.a.tipo_gasto+'.';
+  if(S.a.ingresos)ctx+=' Ingresos mensuales: '+S.a.ingresos+'€.';
+  if(S.a.estabilidad)ctx+=' Situación laboral: '+S.a.estabilidad+'.';
+  if(S.a.viv_tipo)ctx+=' Vivienda: '+S.a.viv_tipo+(S.a.viv_importe?' de '+S.a.viv_importe+'€/mes':'')+'.';
+  if(S.a.trans_tipo)ctx+=' Transporte: '+S.a.trans_tipo+'.';
+  if(S.a.tiene_deudas==='si')ctx+=' Tiene préstamos activos.';
+  return ctx;
+}
+
+function fetchNewsForStep(){
+  var newsDiv=document.getElementById('news-container');
+  if(!newsDiv)return;
+  var cacheKey=S.step+'_'+JSON.stringify(S.a).length;
+  if(S.newsCache[cacheKey]){newsDiv.innerHTML=S.newsCache[cacheKey];return;}
+  newsDiv.innerHTML='<div class="news-loading"><div class="news-spin"></div><span>Buscando noticias que te afectan...</span></div>';
+  var ctx=buildNewsContext();
+  var prompt='Eres un asistente financiero personal. Basándote en este perfil de usuario: "'+ctx+'"\n\nBusca en internet 3 noticias MUY recientes (últimas semanas) que sean directamente relevantes para esta persona concreta. Para cada noticia escribe EXACTAMENTE en este formato JSON:\n[{"contexto":"Por qué le afecta esto (max 8 palabras)","titular":"Titular reescrito en tono de amigo, con gancho, que pique la curiosidad (max 15 palabras)","fuente":"Nombre del medio","fecha":"hace X días/hoy/esta semana"}]\nSolo JSON, sin explicaciones. El titular debe hablar directamente a la situación del usuario, no ser genérico.';
+  fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:prompt}]})})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    var text='';
+    if(d.content)d.content.forEach(function(c){if(c.type==='text')text+=c.text;});
+    try{
+      var clean=text.replace(/```json|```/g,'').trim();
+      var start=clean.indexOf('['),end=clean.lastIndexOf(']');
+      if(start>=0&&end>=0)clean=clean.substring(start,end+1);
+      var news=JSON.parse(clean);
+      var html='<div class="news-block"><div class="news-eyebrow">📡 Noticias que te afectan a ti</div>';
+      news.forEach(function(n){
+        html+='<div class="news-item"><div class="news-context">'+n.contexto+'</div><div class="news-title">'+n.titular+'</div><div class="news-meta">'+n.fuente+' · '+n.fecha+'</div></div>';
+      });
+      html+='</div>';
+      S.newsCache[cacheKey]=html;
+      if(document.getElementById('news-container'))document.getElementById('news-container').innerHTML=html;
+    }catch(e){if(document.getElementById('news-container'))document.getElementById('news-container').innerHTML='';}
+  })
+  .catch(function(){if(document.getElementById('news-container'))document.getElementById('news-container').innerHTML='';});
+}
+
+function attachEnter(){
+  setTimeout(function(){
+    document.querySelectorAll('input[type="number"],input[type="text"]').forEach(function(inp){
+      inp.addEventListener('keydown',function(e){
+        if(e.key==='Enter'){e.preventDefault();var btn=document.getElementById('btnMain');if(btn&&!btn.disabled){btn.click();return;}var btns=document.querySelectorAll('.btn-primary');btns.forEach(function(b){if(!b.disabled)b.click();});}
+      });
+    });
+  },120);
+}
+
+function render(){
+  updateLabel();
+  var step=cur();
+  var h='<div class="fade">';
+
+  if(step.type==='bienvenida'){
+    h+='<div class="eyebrow">Bienvenido</div>';
+    h+='<div class="q-head">Antes de empezar, ¿cómo te llamas?</div>';
+    h+='<div class="q-sub">Tu análisis será 100% personalizado para ti.</div>';
+    h+='<div class="field"><label>Tu nombre</label><input type="text" id="numInp" value="'+gVal('nombre')+'" placeholder="Ej: Diego" oninput="S.a.nombre=this.value;var btn=document.getElementById(\'btnMain\');if(btn)btn.disabled=!this.value.trim();" /></div>';
+    h+='<div class="grid2">';
+    h+='<div class="field" style="margin:0"><label>Ciudad</label><input type="text" value="'+gVal('ciudad')+'" placeholder="Ej: Madrid" oninput="S.a.ciudad=this.value" /></div>';
+    h+='<div class="field" style="margin:0"><label>País</label><select oninput="S.a.pais=this.value"><option value="España" '+(gVal('pais','España')==='España'?'selected':'')+'>🇪🇸 España</option><option value="Colombia" '+(S.a.pais==='Colombia'?'selected':'')+'>🇨🇴 Colombia</option><option value="México" '+(S.a.pais==='México'?'selected':'')+'>🇲🇽 México</option><option value="Argentina" '+(S.a.pais==='Argentina'?'selected':'')+'>🇦🇷 Argentina</option><option value="Chile" '+(S.a.pais==='Chile'?'selected':'')+'>🇨🇱 Chile</option><option value="otro">🌎 Otro</option></select></div>';
+    h+='</div>';
+    h+='<button class="btn-primary" id="btnMain" '+(gVal('nombre')?'':'disabled')+' onclick="next()">Empezar mi análisis →</button>';
+
+  } else if(step.type==='opts'){
+    if(step.ey)h+='<div class="eyebrow">'+step.ey+'</div>';
+    h+='<div class="q-head">'+step.q+'</div>';
+    if(step.sub)h+='<div class="q-sub">'+step.sub+'</div>';
+    h+='<div class="opts">';
+    step.opts.forEach(function(x){h+='<button class="opt '+(S.a[step.id]===x.v?'sel':'')+'" data-group="'+step.id+'" data-val="'+x.v+'" onclick="selOpt(\''+step.id+'\',\''+x.v+'\')"><span class="opt-ico">'+x.i+'</span><span>'+x.l+'</span></button>';});
+    h+='</div><button class="btn-primary" id="btnMain" '+(S.a[step.id]?'':'disabled')+' onclick="next()">Continuar →</button>';
+
+  } else if(step.type==='number'){
+    var v=gVal(step.id);
+    if(step.ey)h+='<div class="eyebrow">'+step.ey+'</div>';
+    h+='<div class="q-head">'+step.q+'</div>';
+    if(step.sub)h+='<div class="q-sub">'+step.sub+'</div>';
+    h+='<div class="field"><label>'+step.unit+'</label><input type="number" id="numInp" value="'+v+'" placeholder="'+step.ph+'" oninput="onNum(\''+step.id+'\',this.value)" inputmode="decimal"/></div>';
+    h+='<button class="btn-primary" id="btnMain" '+(v?'':'disabled')+' onclick="next()">Continuar →</button>';
+
+  } else if(step.type==='gasto_custom'){
+    var tipo=S.a.tipo_gasto||'otro';
+    var lbs={hijo:'la guardería o el hijo',vivienda:'la vivienda',coche:'el coche',formacion:'la formación',capricho:'tu capricho',otro:'este gasto'};
+    h+='<div class="eyebrow">El gasto</div><div class="q-head">Cuéntame sobre '+lbs[tipo]+'</div>';
+    if(tipo==='coche'){
+      h+='<div class="field"><label>¿Cuánto cuesta el coche?</label><input type="number" id="val_coche" value="'+gVal('val_coche')+'" placeholder="18000" oninput="S.a.val_coche=this.value;calcCuota()" inputmode="decimal"/></div>';
+      h+='<div class="opts" style="margin-bottom:1rem">';
+      h+='<button class="opt '+(S.a.pago_coche==='contado'?'sel':'')+'" data-group="pago_coche" data-val="contado" onclick="selPagoCoche(\'contado\')"><span class="opt-ico">💵</span><span>Lo pago al contado</span></button>';
+      h+='<button class="opt '+(S.a.pago_coche==='financiado'?'sel':'')+'" data-group="pago_coche" data-val="financiado" onclick="selPagoCoche(\'financiado\')"><span class="opt-ico">📅</span><span>Lo financio</span></button>';
+      h+='</div>';
+      h+='<div id="fin_wrap" style="display:'+(S.a.pago_coche==='financiado'?'grid':'none')+';grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem">';
+      h+='<div class="field" style="margin:0"><label>¿En cuántos años?</label><select oninput="S.a.anos_coche=this.value;calcCuota()"><option value="">Elegir...</option>';
+      [2,3,4,5,6,7].forEach(function(y){h+='<option value="'+y+'"'+(S.a.anos_coche==y?' selected':'')+'>'+y+' años</option>';});
+      h+='</select></div><div class="field" style="margin:0"><label>Entrada (€)</label><input type="number" value="'+gVal('entrada_coche','0')+'" placeholder="0" oninput="S.a.entrada_coche=this.value;calcCuota()" inputmode="decimal"/></div></div>';
+      h+='<div class="calc-preview '+(S.a.val_coche?'show':'')+'" id="cuota_preview"></div>';
+    } else {
+      var esCapricho=(tipo==='capricho'||tipo==='otro');
+h+='<div class="field"><label>'+(esCapricho?'¿Cuánto cuesta?':'¿Cuánto te costaría al mes?')+'</label><input type="number" id="imp_gasto" value="'+gVal('importe_gasto')+'" placeholder="400" oninput="S.a.importe_gasto=this.value;if(esCapricho){S.a.importe_gasto=String(Math.round(parseFloat(this.value)||0));}" inputmode="decimal"/>'+(esCapricho?'<div class="field-hint">Si es un gasto a plazos, pon la cuota mensual. Si es un pago único, divídelo entre 12.</div>':'<div class="field-hint">Si es un gasto anual divídelo entre 12.</div>')+'</div>';
+    }
+    h+='<button class="btn-primary" onclick="validarGasto()">Continuar →</button>';
+
+  } else if(step.type==='vivienda_custom'){
+    h+='<div class="eyebrow">Vivienda</div><div class="q-head">¿Cómo tienes la vivienda?</div><div class="q-sub">Solo lo que pagas tú cada mes.</div>';
+    h+='<div class="opts" style="margin-bottom:1rem">';
+    h+='<button class="opt '+(S.a.viv_tipo==='alquiler'?'sel':'')+'" data-group="viv_tipo" data-val="alquiler" onclick="selVivienda(\'alquiler\')"><span class="opt-ico">🔑</span><span>Pago alquiler</span></button>';
+    h+='<button class="opt '+(S.a.viv_tipo==='hipoteca_variable'?'sel':'')+'" data-group="viv_tipo" data-val="hipoteca_variable" onclick="selVivienda(\'hipoteca_variable\')"><span class="opt-ico">📈</span><span>Hipoteca variable</span></button>';
+    h+='<button class="opt '+(S.a.viv_tipo==='hipoteca_fija'?'sel':'')+'" data-group="viv_tipo" data-val="hipoteca_fija" onclick="selVivienda(\'hipoteca_fija\')"><span class="opt-ico">🏦</span><span>Hipoteca fija</span></button>';
+    h+='<button class="opt '+(S.a.viv_tipo==='nada'?'sel':'')+'" data-group="viv_tipo" data-val="nada" onclick="selVivienda(\'nada\')"><span class="opt-ico">✅</span><span>No pago nada (casa propia o familia)</span></button>';
+    h+='</div>';
+    var vivShow=(S.a.viv_tipo&&S.a.viv_tipo!=='nada')?'block':'none';
+    h+='<div id="viw" style="display:'+vivShow+'">';
+    h+='<div class="field"><label>¿Cuánto pagas al mes?</label><input type="number" value="'+gVal('viv_importe')+'" placeholder="900" oninput="S.a.viv_importe=this.value" inputmode="decimal"/></div></div>';
+    h+='<button class="btn-toggle" onclick="toggleDetail(\'viv_d\')">▼ Añadir más detalle</button>';
+    h+='<div class="detail" id="viv_d">';
+    h+='<div class="grid2"><div class="field" style="margin:0"><label>Comunidad (€/mes)</label><input type="number" value="'+gVal('viv_comunidad')+'" placeholder="80" oninput="S.a.viv_comunidad=this.value" inputmode="decimal"/></div>';
+    h+='<div class="field" style="margin:0"><label>Seguro hogar (€/mes)</label><input type="number" value="'+gVal('viv_seguro')+'" placeholder="30" oninput="S.a.viv_seguro=this.value" inputmode="decimal"/></div></div>';
+    h+='<div class="sep"></div><div class="grid2">';
+    h+='<div class="field" style="margin:0"><label>Luz + gas (€/mes)</label><input type="number" value="'+gVal('viv_luz')+'" placeholder="120" oninput="S.a.viv_luz=this.value" inputmode="decimal"/></div>';
+    h+='<div class="field" style="margin:0"><label>Agua (€/mes)</label><input type="number" value="'+gVal('viv_agua')+'" placeholder="25" oninput="S.a.viv_agua=this.value" inputmode="decimal"/></div></div>';
+    h+='<div class="field" style="margin-top:10px"><label>Internet + móvil (€/mes)</label><input type="number" value="'+gVal('viv_internet')+'" placeholder="60" oninput="S.a.viv_internet=this.value" inputmode="decimal"/></div></div>';
+    h+='<button class="btn-primary" onclick="next()">Continuar →</button>';
+
+  } else if(step.type==='transporte_custom'){
+    h+='<div class="eyebrow">Transporte</div><div class="q-head">¿Cómo te mueves?</div>';
+    h+='<div class="opts" style="margin-bottom:1rem">';
+    h+='<button class="opt '+(S.a.trans_tipo==='coche'?'sel':'')+'" data-group="trans_tipo" data-val="coche" onclick="selTransporte(\'coche\')"><span class="opt-ico">🚗</span><span>Tengo coche propio</span></button>';
+    h+='<button class="opt '+(S.a.trans_tipo==='publico'?'sel':'')+'" data-group="trans_tipo" data-val="publico" onclick="selTransporte(\'publico\')"><span class="opt-ico">🚇</span><span>Transporte público</span></button>';
+    h+='<button class="opt '+(S.a.trans_tipo==='ambos'?'sel':'')+'" data-group="trans_tipo" data-val="ambos" onclick="selTransporte(\'ambos\')"><span class="opt-ico">🔀</span><span>Las dos cosas</span></button>';
+    h+='</div>';
+    var tcShow=(S.a.trans_tipo&&S.a.trans_tipo!=='publico')?'block':'none';
+    var tpShow=(S.a.trans_tipo&&S.a.trans_tipo!=='coche')?'block':'none';
+    h+='<div id="tc" style="display:'+tcShow+'">';
+    h+='<div class="grid2"><div class="field" style="margin:0"><label>Gasolina / carga (€/mes)</label><input type="number" value="'+gVal('trans_gasolina')+'" placeholder="120" oninput="S.a.trans_gasolina=this.value" inputmode="decimal"/></div>';
+    h+='<div class="field" style="margin:0"><label>Seguro del coche (€/año)</label><input type="number" value="'+gVal('trans_seguro_anual')+'" placeholder="600" oninput="S.a.trans_seguro_anual=this.value" inputmode="decimal"/><div class="field-hint">Lo divido entre 12.</div></div></div>';
+    h+='<button class="btn-toggle" onclick="toggleDetail(\'td\')" style="margin-top:4px">▼ Añadir más detalle</button>';
+    h+='<div class="detail" id="td"><div class="grid2">';
+    h+='<div class="field" style="margin:0"><label>Parking (€/mes)</label><input type="number" value="'+gVal('trans_parking')+'" placeholder="80" oninput="S.a.trans_parking=this.value" inputmode="decimal"/></div>';
+    h+='<div class="field" style="margin:0"><label>ITV + impuesto (€/año)</label><input type="number" value="'+gVal('trans_itv_anual')+'" placeholder="180" oninput="S.a.trans_itv_anual=this.value" inputmode="decimal"/></div>';
+    h+='</div></div></div>';
+    h+='<div id="tp" style="display:'+tpShow+'">';
+    h+='<div class="field"><label>Transporte público (€/mes)</label><input type="number" value="'+gVal('trans_publico')+'" placeholder="50" oninput="S.a.trans_publico=this.value" inputmode="decimal"/></div></div>';
+    h+='<button class="btn-primary" onclick="next()">Continuar →</button>';
+
+  } else if(step.type==='vida_custom'){
+    h+='<div class="eyebrow">Vida diaria</div><div class="q-head">¿Cuánto gastas en el día a día?</div><div class="q-sub">Una estimación honesta es suficiente.</div>';
+    h+='<div class="field"><label>Supermercado y hogar (€/mes)</label><input type="number" value="'+gVal('vida_super')+'" placeholder="500" oninput="S.a.vida_super=this.value" inputmode="decimal"/></div>';
+    h+='<button class="btn-toggle" onclick="toggleDetail(\'vd\')">▼ Añadir más detalle</button>';
+    h+='<div class="detail" id="vd"><div class="grid2">';
+    h+='<div class="field" style="margin:0"><label>Seguro médico (€/mes)</label><input type="number" value="'+gVal('vida_medico')+'" placeholder="60" oninput="S.a.vida_medico=this.value" inputmode="decimal"/></div>';
+    h+='<div class="field" style="margin:0"><label>Farmacia (€/mes)</label><input type="number" value="'+gVal('vida_farmacia')+'" placeholder="20" oninput="S.a.vida_farmacia=this.value" inputmode="decimal"/></div></div>';
+    h+='<div class="grid2" style="margin-top:8px"><div class="field" style="margin:0"><label>Colegio / guardería (€/mes)</label><input type="number" value="'+gVal('vida_colegio')+'" placeholder="300" oninput="S.a.vida_colegio=this.value" inputmode="decimal"/></div>';
+    h+='<div class="field" style="margin:0"><label>Extraescolares (€/mes)</label><input type="number" value="'+gVal('vida_extra')+'" placeholder="80" oninput="S.a.vida_extra=this.value" inputmode="decimal"/></div></div>';
+    h+='<div class="grid2" style="margin-top:8px"><div class="field" style="margin:0"><label>Mascotas (€/mes)</label><input type="number" value="'+gVal('vida_mascota')+'" placeholder="50" oninput="S.a.vida_mascota=this.value" inputmode="decimal"/></div>';
+    h+='<div class="field" style="margin:0"><label>Familia a cargo (€/mes)</label><input type="number" value="'+gVal('vida_familia')+'" placeholder="200" oninput="S.a.vida_familia=this.value" inputmode="decimal"/></div></div></div>';
+    h+='<button class="btn-primary" onclick="next()">Continuar →</button>';
+
+  } else if(step.type==='ocio_custom'){
+    h+='<div class="eyebrow">Ocio y estilo de vida</div><div class="q-head">¿Cuánto gastas en vivir bien?</div><div class="q-sub">Sin trampa — esto también cuenta.</div>';
+    h+='<div class="grid2"><div class="field" style="margin:0"><label>Comer fuera + copas (€/mes)</label><input type="number" value="'+gVal('ocio_fuera')+'" placeholder="200" oninput="S.a.ocio_fuera=this.value" inputmode="decimal"/></div>';
+    h+='<div class="field" style="margin:0"><label>Ropa y caprichos (€/mes)</label><input type="number" value="'+gVal('ocio_ropa')+'" placeholder="100" oninput="S.a.ocio_ropa=this.value" inputmode="decimal"/></div></div>';
+    h+='<div class="grid2"><div class="field" style="margin:0"><label>Viajes al año (€)</label><input type="number" value="'+gVal('ocio_viajes_anual')+'" placeholder="2000" oninput="S.a.ocio_viajes_anual=this.value" inputmode="decimal"/><div class="field-hint">Lo divido entre 12.</div></div>';
+    h+='<div class="field" style="margin:0"><label>Suscripciones (€/mes)</label><input type="number" value="'+gVal('ocio_subs')+'" placeholder="40" oninput="S.a.ocio_subs=this.value" inputmode="decimal"/></div></div>';
+    h+='<div class="field"><label>Peluquería, estética, otros (€/mes)</label><input type="number" value="'+gVal('ocio_otros')+'" placeholder="50" oninput="S.a.ocio_otros=this.value" inputmode="decimal"/></div>';
+    h+='<button class="btn-primary" onclick="next()">Continuar →</button>';
+
+  } else if(step.type==='deudas_custom'){
+    h+='<div class="eyebrow">Deudas</div><div class="q-head">¿Tienes préstamos o financiaciones activas?</div><div class="q-sub">Cualquier cuota mensual ya comprometida.</div>';
+    h+='<div class="opts" style="margin-bottom:1rem">';
+    h+='<button class="opt '+(S.a.tiene_deudas==='no'?'sel':'')+'" data-group="tiene_deudas" data-val="no" onclick="selDeuda(\'no\')"><span class="opt-ico">✅</span><span>No, ninguna</span></button>';
+    h+='<button class="opt '+(S.a.tiene_deudas==='si'?'sel':'')+'" data-group="tiene_deudas" data-val="si" onclick="selDeuda(\'si\')"><span class="opt-ico">💳</span><span>Sí, tengo algún préstamo o financiación</span></button>';
+    h+='</div>';
+    h+='<div id="dw" style="display:'+(S.a.tiene_deudas==='si'?'block':'none')+'">';
+    h+='<div class="field"><label>Total de cuotas al mes (€)</label><input type="number" value="'+gVal('deudas_total')+'" placeholder="350" oninput="S.a.deudas_total=this.value" inputmode="decimal"/></div></div>';
+    h+='<button class="btn-primary" onclick="next()">Continuar →</button>';
+
+  } else if(step.type==='ahorro_custom'){
+    h+='<div class="eyebrow">Ahorro</div><div class="q-head">¿Cuánto tienes guardado y cuánto ahorras?</div>';
+    h+='<div class="grid2"><div class="field" style="margin:0"><label>Apartas cada mes sin tocar (€)</label><input type="number" value="'+gVal('ahorro_mensual')+'" placeholder="200" oninput="S.a.ahorro_mensual=this.value" inputmode="decimal"/></div>';
+    h+='<div class="field" style="margin:0"><label>Colchón disponible ahora (€)</label><input type="number" value="'+gVal('colchon_total')+'" placeholder="8000" oninput="S.a.colchon_total=this.value" inputmode="decimal"/><div class="field-hint">Lo que tienes para emergencias.</div></div></div>';
+    h+='<button class="btn-primary" onclick="next()">Continuar →</button>';
+
+  } else if(step.type==='texto_libre'){
+    h+='<div class="eyebrow">Último paso</div><div class="q-head">¿Hay algo que no encaja en el formulario?</div>';
+    h+='<div class="q-sub">La IA lo leerá e incorporará al análisis. Pensión alimenticia, baja maternal, cambio de trabajo inminente...</div>';
+    h+='<div class="field"><textarea placeholder="Ej: Mi pareja vuelve al trabajo en 3 meses..." oninput="S.a.texto_libre=this.value">'+gVal('texto_libre')+'</textarea></div>';
+    h+='<button class="btn-primary" onclick="next()">Ver mi análisis →</button>';
+  }
+
+  /* Contenedor de noticias — aparece en todos los pasos excepto bienvenida y resultado */
+  if(step.type!=='bienvenida'){
+    h+='<div id="news-container"></div>';
+  }
+
+  if(S.step>0)h+='<button class="btn-back" onclick="back()">← Atrás</button>';
+  h+='</div>';
+  document.getElementById('content').innerHTML=h;
+  attachEnter();
+  setTimeout(function(){var ni=document.getElementById('numInp');if(ni)ni.focus();},60);
+  if(S.a.val_coche)setTimeout(calcCuota,80);
+}
+
+function calcCuota(){
+  var vcEl=document.getElementById('val_coche');
+  var val=parseFloat(vcEl?vcEl.value:0)||parseFloat(S.a.val_coche)||0;
+  var entrada=parseFloat(S.a.entrada_coche)||0,anos=parseFloat(S.a.anos_coche)||0;
+  var preview=document.getElementById('cuota_preview');if(!preview)return;
+  if(S.a.pago_coche==='contado'){S.a.importe_gasto=val>0?String(Math.round(val/60)):'0';preview.className='calc-preview'+(val>0?' show':'');preview.textContent=val>0?'Coste mensual equivalente: '+Math.round(val/60).toLocaleString('es-ES')+' €':'';return;}
+  if(val>0&&anos>0){var r=0.07/12,n=anos*12,f=val-entrada,c=f*r/(1-Math.pow(1+r,-n));S.a.importe_gasto=String(Math.round(c));preview.className='calc-preview show';preview.textContent='Cuota mensual estimada: '+Math.round(c).toLocaleString('es-ES')+' € (TAE ~7%)';}
+  else{preview.className='calc-preview';preview.textContent='';}
+}
+
+function validarGasto(){
+  if(S.a.tipo_gasto==='coche'){
+    if(!S.a.val_coche||parseFloat(S.a.val_coche)<=0){alert('Introduce el valor del coche');return;}
+    if(!S.a.pago_coche){alert('¿Lo pagas al contado o financiado?');return;}
+    if(S.a.pago_coche==='financiado'&&!S.a.anos_coche){alert('¿En cuántos años lo financias?');return;}
+    calcCuota();
+  } else if(S.a.tipo_gasto==='capricho'||S.a.tipo_gasto==='otro'){
+    if(!S.a.precio_total_capricho||parseFloat(S.a.precio_total_capricho)<=0){alert('Introduce el precio del gasto');return;}
+    if(!S.a.pago_capricho){alert('¿Lo pagas de una vez o a plazos?');return;}
+    if(S.a.pago_capricho==='plazos'&&!S.a.meses_capricho){alert('¿En cuántos meses lo pagas?');return;}
+    calcCapricho();
+  } else {
+    if(!S.a.importe_gasto||parseFloat(S.a.importe_gasto)<=0){alert('Introduce el coste mensual');return;}
+  }
+  next();
+}
+
+function calcular(){
+  var ing=getNum('ingresos'),gn=getNum('importe_gasto');
+  var viv=S.a.viv_tipo==='nada'?0:getNum('viv_importe');
+  var vx=getNum('viv_comunidad')+getNum('viv_seguro')+getNum('viv_luz')+getNum('viv_agua')+getNum('viv_internet');
+  var trans=getNum('trans_gasolina')+(getNum('trans_seguro_anual')/12)+getNum('trans_parking')+(getNum('trans_itv_anual')/12)+getNum('trans_publico');
+  var vida=getNum('vida_super')+getNum('vida_medico')+getNum('vida_farmacia')+getNum('vida_colegio')+getNum('vida_extra')+getNum('vida_mascota')+getNum('vida_familia');
+  var ocio=getNum('ocio_fuera')+getNum('ocio_ropa')+getNum('ocio_subs')+getNum('ocio_otros')+(getNum('ocio_viajes_anual')/12);
+  var deudas=S.a.tiene_deudas==='si'?getNum('deudas_total'):0;
+  var ahorro=getNum('ahorro_mensual'),colchon=getNum('colchon_total');
+  var gf=viv+vx+trans+deudas,gv=vida+ocio+ahorro,margen=ing-(gf+gv+gn);
+  var ratio=ing>0?((gf+gn)/ing)*100:100,gmes=gf+gv,cmeses=gmes>0?colchon/gmes:0,ns=Math.round(gmes*3);
+  var frag=0;
+  if(S.a.estabilidad==='temporal')frag+=1;if(S.a.estabilidad==='autonomo')frag+=0.5;if(S.a.estabilidad==='mixto')frag+=0.25;
+  var color='verde';
+  if(ratio>65||margen<100||cmeses<1)color='rojo';else if(ratio>50||margen<300||cmeses<2)color='amarillo';
+  if(frag>=1&&color==='verde')color='amarillo';if(frag>=1.5&&color==='amarillo')color='rojo';
+  return{ratio:ratio,margen:margen,cmeses:cmeses,ns:ns,color:color,ing:ing,gn:gn,gmes:gmes};
+}
+
+function getPunch(res){
+  var m=Math.round(res.margen),col=res.cmeses,est=S.a.estabilidad,g=Math.round(res.gn);
+  var nombre=gVal('nombre','');
+  var prefix=nombre?nombre+', ':'';
+  if(res.color==='verde'){
+    if(col>=6)return prefix+'con '+Math.round(res.ing).toLocaleString('es-ES')+'€ al mes y '+Math.round(col)+' meses de colchón, puedes asumir esto y seguir durmiendo bien.';
+    if(col>=3)return 'Los números cuadran. La única pregunta real es si este gasto te aporta lo que crees que te va a aportar.';
+    return 'Puedes permitírtelo, pero tu colchón es justo. Asúmelo, pero no dejes de ahorrar.';
+  }
+  if(res.color==='amarillo'){
+    if(est==='temporal')return 'Técnicamente puedes pagarlo, pero con contrato temporal y este margen tan ajustado, un mes sin trabajo te deja contra las cuerdas.';
+    if(m<200)return 'Te quedarían solo '+m+'€ al mes después de todo. Muy poco para lo que puede pasar.';
+    return 'Puedes asumirlo, pero pasas de tener respiro a estar al límite. ¿Merece la pena?';
+  }
+  if(res.margen<0)return 'Cada mes gastarías '+Math.abs(m).toLocaleString('es-ES')+'€ más de lo que entra. Añadir '+g.toLocaleString('es-ES')+'€ más no es tensar la cuerda — es romperla.';
+  if(col<1)return 'Sin colchón y con los compromisos al límite, cualquier imprevisto te pone en una situación muy difícil.';
+  return 'Los números dicen que no es el momento. Asumir esto ahora significaría vivir sin red.';
+}
+
+function getSocial(res){
+  var t=S.a.tipo_gasto||'otro';
+  var pv={hijo:58,vivienda:52,coche:61,formacion:44,capricho:67,otro:55};
+  var pa={hijo:41,vivienda:38,coche:45,formacion:52,capricho:60,otro:43};
+  var pr={hijo:72,vivienda:68,coche:74,formacion:58,capricho:81,otro:70};
+  if(res.color==='verde')return '<strong>El '+(pv[t]||55)+'% de personas con un perfil económico similar al tuyo</strong> sí asumen este tipo de gasto.';
+  if(res.color==='amarillo')return '<strong>El '+(pa[t]||43)+'% de personas en tu situación acaban posponiendo este gasto</strong> o lo reducen antes de comprometerse.';
+  return '<strong>El '+(pr[t]||70)+'% de personas con tu ratio de compromisos deciden esperar</strong> antes de asumir un gasto de este tamaño.';
+}
+
+function getTips(res){
+  var tipo=S.a.tipo_gasto||'otro';
+  var tips={
+    verde:[
+      {t:'Protege este sí con un colchón sólido',b:'Antes de comprometerte, asegúrate de que tienes 3 meses de gastos cubiertos en cuenta. Sin eso, cualquier imprevisto pone en riesgo lo que acabas de decidir.'},
+      {t:'Revisa el coste real, no el coste de etiqueta',b:'El precio que pagas no es el único coste. Suma seguros, mantenimiento y gastos asociados. El coste real suele ser un 20-30% más alto.'},
+      {t:'El margen libre es tu seguro de vida financiero',b:'Esos '+Math.round(res.margen)+'€ que te sobran al mes son tu red. Intenta que no bajen de 200€ aunque asumas este gasto.'},
+      {t:'Buen momento, pero no te relajes',b:'Las finanzas sanas no son un estado permanente — son un hábito. Revisa tus números cada 3 meses.'}
+    ],
+    amarillo:[
+      {t:'La zona amarilla es la más peligrosa',b:'No porque no puedas pagarlo, sino porque te deja sin margen para imprevistos. Un mes malo puede convertirse en una bola de nieve.'},
+      {t:'¿Puedes reducir este gasto un 20%?',b:'Antes de comprometerte con el importe completo, busca si hay una versión más pequeña de este gasto que te deje más respiro.'},
+      {t:'Tu colchón es lo que te separa de un problema real',b:'Con menos de 3 meses de gastos ahorrados, este gasto aumenta significativamente tu exposición al riesgo.'},
+      {t:'Atención a los gastos hormiga',b:'En situación de margen ajustado, los pequeños gastos impulsivos son los que rompen el presupuesto. Un café diario son 50€ al mes.'}
+    ],
+    rojo:[
+      {t:'Un no ahora no es un no para siempre',b:'Las finanzas cambian. Si en 6-12 meses reduces un gasto fijo importante o aumentan tus ingresos, este análisis puede ser verde.'},
+      {t:'Identifica qué gasto fijo puedes eliminar',b:'Antes de asumir algo nuevo, busca algo existente que puedas reducir o eliminar. Cada 100€ que liberas cambia el color de tu semáforo.'},
+      {t:'El riesgo real es el efecto dominó',b:'Comprometerte cuando no tienes margen significa que el primer imprevisto te obliga a endeudarte. Una deuda lleva a otra.'},
+      {t:'Habla con alguien de confianza antes de decidir',b:'No para que te digan lo que quieres oír — sino para que te ayuden a ver lo que no estás viendo.'}
+    ]
+  };
+  return tips[res.color]||tips.verde;
+}
+
+async function runCalc(){
+  document.getElementById('stepLabel').textContent='';
+  document.getElementById('progFill').style.width='100%';
+  var res=calcular();
+  var nombre=gVal('nombre','');
+  var cfg={
+    verde:{icon:'🟢',title:(nombre?nombre+', todo':'Todo')+' apunta a que sí puedes.',msgs:['Revisando ingresos… ✓','Compromisos dentro del límite ✓','Calculando tu margen real…','Preparando tu informe…']},
+    amarillo:{icon:'🟡',title:'Hay algo que deberías saber antes de decidir.',msgs:['Revisando ingresos… ✓','Compromisos en zona de alerta ⚠️','Calculando el margen disponible…','Preparando tu informe…']},
+    rojo:{icon:'🔴',title:'Los números nos piden que hablemos.',msgs:['Revisando ingresos… ✓','Compromisos por encima del límite ✗','Analizando el impacto real…','Preparando tu informe…']}
+  };
+  var tf=cfg[res.color];
+  document.getElementById('content').innerHTML='<div class="tension"><span class="t-icon">'+tf.icon+'</span><div class="t-title">'+tf.title+'</div><div class="t-msg" id="tmsg">Analizando tu situación…</div><div class="t-track"><div class="t-fill '+res.color+'" id="tfill" style="width:0%"></div></div><div class="t-pct" id="tpct">0%</div></div>';
+  var pct=0,mi=0;
+  var iv=setInterval(function(){pct+=2;var f=document.getElementById('tfill'),m=document.getElementById('tmsg'),p=document.getElementById('tpct');if(f)f.style.width=pct+'%';if(p)p.textContent=pct+'%';if(m&&[20,50,80,96].indexOf(pct)>=0){m.textContent=tf.msgs[mi]||'Preparando…';mi++;}if(pct>=100)clearInterval(iv);},40);
+  var tl=S.a.texto_libre||'';
+  var ia='';
+  if(tl&&tl.trim().length>10){
+    try{
+      var r2=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:'Eres un analista financiero personal, español, tono cercano y directo, sin jerga. El usuario se llama '+gVal('nombre','alguien')+' y vive en '+gVal('ciudad','España')+'. Escribió: "'+tl+'". Resultado: semáforo '+res.color+', ratio '+Math.round(res.ratio)+'%, margen libre '+Math.round(res.margen)+'€/mes, colchón '+res.cmeses.toFixed(1)+' meses. Escribe UN párrafo corto (2-3 frases) incorporando lo que explicó. Sin asteriscos ni listas.'}]})});
+      var d=await r2.json();ia=d.content&&d.content[0]?d.content[0].text:'';
+    }catch(e){}
+  }
+  S.lastRes=res;setTimeout(function(){renderRes(res,ia);},4300);
+}
+
+function renderRes(res,ia){
+  var tipo=S.a.tipo_gasto||'otro';
+  var nombre=gVal('nombre','');
+  var ciudad=gVal('ciudad','');
+  var tls={hijo:'la guardería',vivienda:'este cambio de vivienda',coche:'el coche',formacion:'esta formación',capricho:'este capricho',otro:'este gasto'};
+  var tl=tls[tipo]||'este gasto';
+  var r=Math.round(res.ratio),m=Math.round(res.margen),neg=res.margen<0;
+  var titles={verde:'Sí'+(nombre?', '+nombre:'')+', puedes asumir '+tl+'.',amarillo:'Puedes, pero con los ojos abiertos.',rojo:'No lo haría todavía.'};
+  var bodies={
+    verde:'Con este gasto, tus compromisos fijos se quedan en el '+r+'% de tus ingresos — por debajo del límite del 50%. Te sobrarían '+m.toLocaleString('es-ES')+'€ al mes libres de verdad.',
+    amarillo:'Con '+tl+', tus compromisos fijos suben al '+r+'% de tus ingresos. Zona de alerta: técnicamente aguanta, pero un imprevisto te deja sin margen.',
+    rojo:'Con '+tl+', tus compromisos fijos llegarían al '+r+'% de tus ingresos. '+(neg?'Cada mes gastarías '+Math.abs(m).toLocaleString('es-ES')+'€ más de lo que entra.':'El margen que quedaría es demasiado justo.')
+  };
+  var colT=res.cmeses<1?'Tienes menos de 1 mes de gastos cubiertos.':res.cmeses<3?'Tienes '+res.cmeses.toFixed(1)+' meses cubiertos. Lo recomendado son 3 meses mínimo.':'Tienes '+res.cmeses.toFixed(1)+' meses cubiertos — zona segura.';
+  var tips=getTips(res);
+  var pdfLs={hijo:'guardería y primer año de hijo',vivienda:'alquiler y compra'+(ciudad?' en '+ciudad:''),coche:'precios y costes reales del coche',formacion:'ROI de la formación elegida',capricho:'tu decisión concreta',otro:'tu situación'};
+  var emoji=res.color==='verde'?'🟢':res.color==='amarillo'?'🟡':'🔴';
+
+  var tipsHtml='<div class="tips-section"><div class="tips-eyebrow">4 cosas que deberías saber</div>';
+  tips.forEach(function(tip,i){
+    tipsHtml+='<div class="tip-item"><div class="tip-num">0'+(i+1)+'</div><div class="tip-content"><div class="tip-title">'+tip.t+'</div><div class="tip-body">'+tip.b+'</div></div></div>';
+  });
+  tipsHtml+='</div>';
+
+  document.getElementById('content').innerHTML=
+    '<div class="result">'+
+    '<div class="res-eyebrow">✓ Banco de España · OCDE · BCE</div>'+
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:.85rem"><div class="semaforo '+res.color+'">'+emoji+'</div><div class="res-title">'+titles[res.color]+'</div></div>'+
+    '<div class="res-body">'+bodies[res.color]+'</div>'+
+    '<div class="punch '+res.color+'">'+getPunch(res)+'</div>'+
+    '<div class="social"><div class="social-ico">📊</div><div class="social-txt">'+getSocial(res)+'</div></div>'+
+    (ia?'<div class="ia-note"><strong>Sobre lo que nos has contado:</strong> '+ia+'</div>':'')+
+    '<div class="numero-card"><div class="numero-eyebrow">Tu número de seguridad</div><div class="numero-val">'+res.ns.toLocaleString('es-ES')+' €</div><div class="numero-desc">'+colT+' Este número es 3 meses de todos tus gastos — el colchón mínimo para estar tranquilo.</div></div>'+
+    '<div class="inds"><div class="ind"><div class="ind-val">'+r+'%</div><div class="ind-lbl">Compromisos sobre ingresos</div></div>'+
+    '<div class="ind"><div class="ind-val '+(neg?'neg':'')+'">'+( neg?m.toLocaleString('es-ES'):'+'+m.toLocaleString('es-ES'))+' €</div><div class="ind-lbl">Margen libre real</div></div>'+
+    '<div class="ind"><div class="ind-val">'+res.cmeses.toFixed(1)+'</div><div class="ind-lbl">Meses de colchón</div></div></div>'+
+    tipsHtml+
+    '<div class="divider"></div>'+
+    '<div class="cta-box"><div class="cta-tag">Informe completo · PDF</div>'+
+    '<div class="cta-title">Tu informe financiero completo.</div>'+
+    '<div class="cta-sub">Con tu nombre'+(ciudad?' y '+ciudad:'')+' en portada, el desglose visual de tu dinero, datos de mercado actuales y los pasos exactos a seguir.</div>'+
+    '<div class="cta-list">'+
+    '<span>Portada personalizada con tu nombre'+(ciudad?' y '+ciudad:'')+'</span>'+
+    '<span>Gráfico visual de cómo se reparte tu dinero</span>'+
+    '<span>Datos de mercado para '+(pdfLs[tipo]||'tu situación')+'</span>'+
+    '<span>3 pasos concretos para tu situación específica</span>'+
+    '<span>Las noticias que te afectan — con fuente y fecha</span>'+
+    '</div>'+
+    '<button class="btn-buy" onclick="this.innerHTML=\'Conectando con el pago…\'">'+
+    '<span>Descargar mi informe completo</span><span style="font-size:19px;opacity:.75;margin-left:8px">4,99 €</span></button>'+
+    '<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border))">'+
+    '<span style="font-size:11px;color:var(--ink3);font-weight:500;text-transform:uppercase;letter-spacing:.04em">Compartir</span>'+
+    '<button onclick="shareWA()" style="background:#25D366;color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600;font-family:Inter,sans-serif">WhatsApp</button>'+
+    '<button onclick="shareX()" style="background:#000;color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600;font-family:Inter,sans-serif">X</button>'+
+    '<button onclick="shareNative()" style="background:var(--bg2);color:var(--ink2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:16px;line-height:1">⬆️</button>'+
+    '</div>'+
+    '<div class="email-row"><input type="email" placeholder="O recibe el resumen gratis por email" id="emailInp"/>'+
+    '<button class="btn-email" onclick="sendEmail()">Enviar</button></div>'+
+    '<div class="cta-footnote">El email incluye el resumen. El PDF completo con todo el detalle son los 4,99€.</div></div>'+
+    '<button class="btn-restart" onclick="reiniciar()">Hacer otro análisis</button></div>';
+}
+
+function sendEmail(){
+  var e=document.getElementById('emailInp').value;
+  if(!e||e.indexOf('@')<0){document.getElementById('emailInp').style.borderColor='#C03030';return;}
+  var row=document.querySelector('.email-row');
+  row.insertAdjacentHTML('afterend','<div style="font-size:13px;color:#5C5750;padding:6px 0;text-align:center">✅ Resumen enviado a '+e+'</div>');
+  row.remove();
+}
+
+
+function shareWA(){
+  var nombre=S.a.nombre||'';
+  var tipo=S.a.tipo_gasto||'algo';
+  var res=S.lastRes||{color:'verde'};
+  var emoji=res.color==='verde'?'🟢':res.color==='amarillo'?'🟡':'🔴';
+  var texto=emoji+' Acabo de analizar si me puedo permitir '+tipo+' y el resultado me ha sorprendido. Pruébalo en melopuedopermitir.com';
+  window.open('https://wa.me/?text='+encodeURIComponent(texto),'_blank');
+}
+function shareX(){
+  var tipo=S.a.tipo_gasto||'algo';
+  var res=S.lastRes||{color:'verde'};
+  var emoji=res.color==='verde'?'🟢':res.color==='amarillo'?'🟡':'🔴';
+  var texto=emoji+' Analicé si me puedo permitir '+tipo+'. El resultado en melopuedopermitir.com';
+  window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(texto),'_blank');
+}
+function shareNative(){
+  var tipo=S.a.tipo_gasto||'algo';
+  var res=S.lastRes||{color:'verde'};
+  var emoji=res.color==='verde'?'🟢':res.color==='amarillo'?'🟡':'🔴';
+  if(navigator.share){navigator.share({title:'¿Me lo puedo permitir?',text:emoji+' Analicé si me puedo permitir '+tipo+'. Pruébalo.',url:'https://melopuedopermitir.com'});}
+  else{navigator.clipboard&&navigator.clipboard.writeText('https://melopuedopermitir.com').then(function(){alert('Enlace copiado');});}
+}
+
+function iniciarPago(btn) {
+  btn.disabled = true;
+  btn.innerHTML = '<span>Redirigiendo al pago…</span>';
+  // Guardar datos en sessionStorage para el webhook
+  try {
+    var res = calcular();
+    var userData = Object.assign({}, S.a, {
+      ratio: Math.round(res.ratio), margen: Math.round(res.margen),
+      cmeses: Math.round(res.cmeses*10)/10, ns: res.ns,
+      ingresos: getNum('ingresos'), gasto_nuevo: getNum('importe_gasto'),
+      gastos_mes: Math.round(res.gmes), color: res.color
+    });
+    sessionStorage.setItem('userData', JSON.stringify(userData));
+  } catch(e) {}
+  // Ir directo a Stripe
+  setTimeout(function() {
+    window.location.href = 'https://buy.stripe.com/test_4gM00k3sFeK4b0agNX6Na00';
+  }, 400);
+}
+
+
+function rellenarTest() {
+  S.a = {
+    nombre: 'Diego',
+    ciudad: 'Zaragoza',
+    pais: 'España',
+    tipo_gasto: 'coche',
+    val_coche: '18000',
+    pago_coche: 'financiado',
+    anos_coche: '4',
+    entrada_coche: '2000',
+    importe_gasto: '370',
+    ingresos: '3000',
+    estabilidad: 'indefinido',
+    viv_tipo: 'alquiler',
+    viv_importe: '850',
+    trans_tipo: 'coche',
+    trans_gasolina: '120',
+    trans_seguro_anual: '600',
+    vida_super: '400',
+    ocio_fuera: '150',
+    ocio_ropa: '80',
+    ocio_subs: '30',
+    tiene_deudas: 'no',
+    ahorro_mensual: '150',
+    colchon_total: '3000',
+    texto_libre: ''
+  };
+  S.step = STEPS.length - 1;
+  render();
+  setTimeout(function(){ next(); }, 300);
+}
+
+function reiniciar(){S.step=0;S.a={};S.newsCache={};render();
+
+// Comprobar si viene de pago exitoso
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('pago') === 'ok') {
+    setTimeout(function() {
+      alert('¡Pago completado! En unos minutos recibirás el informe en tu email.');
+    }, 500);
+  }
+})();
+}
+render();
+
+// Comprobar si viene de pago exitoso
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('pago') === 'ok') {
+    setTimeout(function() {
+      alert('¡Pago completado! En unos minutos recibirás el informe en tu email.');
+    }, 500);
+  }
+})();
+
+</script>
+
+<button class="btn-test" onclick="rellenarTest()">🧪 Test rápido</button>
+</body></html>
